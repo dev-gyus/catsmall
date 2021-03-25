@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.jdo.annotations.Join;
 import javax.persistence.*;
 
 @Entity

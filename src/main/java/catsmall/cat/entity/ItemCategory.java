@@ -7,7 +7,6 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.lang.Nullable;
 
-import javax.jdo.annotations.Join;
 import javax.persistence.*;
 
 @Entity
