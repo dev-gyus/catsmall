@@ -1,0 +1,160 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<div th:fragment="head">
+    <script src="/node_modules/jquery/dist/jquery.min.js"></script>
+    <link rel="stylesheet" href="/node_modules/bootstrap/dist/css/bootstrap.min.css"/>
+    <link rel="stylesheet" href="/node_modules/cropperjs/dist/cropper.min.css"/>
+    <link rel="stylesheet" href="/node_modules/font-awesome/css/font-awesome.css"/>
+    <link rel="stylesheet" href="/node_modules/summernote/dist/summernote-lite.min.css"/>
+    <script src="/node_modules/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="/node_modules/jdenticon/dist/jdenticon.min.js"></script>
+    <script src="/node_modules/cropperjs/dist/cropper.min.js"></script>
+    <script src="/node_modules/jquery-cropper/dist/jquery-cropper.min.js"></script>
+    <script src="/node_modules/summernote/dist/summernote-lite.min.js"></script>
+</div>
+
+<script th:fragment="form-validation">
+    (function validate() {
+        'use strict'
+
+        // Fetch all the forms we want to apply custom Bootstrap validation styles to
+        var forms = document.querySelectorAll('.needs-validation')
+
+        // Loop over them and prevent submission
+        Array.prototype.slice.call(forms)
+            .forEach(function (form) {
+                form.addEventListener('submit', function (event) {
+                    if (!form.checkValidity()) {
+                        event.preventDefault()
+                        event.stopPropagation()
+                    }
+
+                    form.classList.add('was-validated')
+                }, false)
+            });
+    })()
+</script>
+
+<script th:fragment="infinityScrollPaging (size, defaultPage, col, category, type, isEvent)">
+    let isLastPage = false;
+    let itemDiv = document.getElementById('itemDiv');
+    let size = '[[${size}]]';
+    let page = '[[${defaultPage}]]';
+    let fetchReady = true;
+    let colSize = '[[${col}]]';
+    let category = '[[${category}]]';
+    let type = '[[${type}]]';
+    let middleUrl;
+    if ([[${isEvent}]]) {
+        middleUrl = 'eventItem';
+    } else {
+        middleUrl = 'item'
+    }
+    // 페이징
+    $(function () {
+        $(window).scroll(function () {
+            let $window = $(this);
+            let scrollTop = $window.scrollTop();
+            let windowHeight = $window.height();
+            let documentHeight = $(document).height();
+
+            // scrollbar의 thumb가 바닥 전 30px까지 도달 하면 리스트를 가져온다.
+            if ((scrollTop + windowHeight + 30) > documentHeight && !isLastPage && fetchReady) {
+                addEventItem(size, ++page, colSize, category, type, middleUrl);
+                fetchReady = false;
+            }
+        })
+    });
+
+    function addEventItem(size, page, colSize, category, type, middleUrl) {
+        $.ajax({
+            url: '/api/find-' + middleUrl + '-list?size=' + size + '&page=' + page + '&category=' + category
+                    + '&type=' + type,
+            type: 'get',
+            dataType: 'json',
+            success: function (result) {
+                let page = result.itemlistDtoList;
+                let homeDtoList = page.content;
+                isLastPage = page.last;
+                for (let homeDto of homeDtoList) {
+                    let parentDiv = document.createElement('div');
+                    parentDiv.setAttribute('class', colSize);
+                    let cardDiv = document.createElement('div');
+                    cardDiv.setAttribute("class", "card");
+
+                    let img = document.createElement('img');
+                    img.src = '/upload/thumbnail/' + homeDto.thumbnailName;
+                    img.setAttribute('class', 'card-img-top');
+                    cardDiv.appendChild(img);
+
+                    let cardBody = document.createElement('div');
+                    cardBody.setAttribute('class', 'card-body');
+
+                    let cardTitle = document.createElement('h5');
+                    cardTitle.setAttribute('class', 'card-title');
+                    cardTitle.innerHTML = homeDto.name;
+                    cardBody.appendChild(cardTitle);
+
+                    let p = document.createElement('p');
+                    p.setAttribute('class', 'card-text text-end');
+
+                    if (homeDto.event) {
+                        let originPrice = document.createElement('span');
+                        originPrice.setAttribute('class', 'fs-5 text-decoration-line-through');
+                        originPrice.innerHTML = homeDto.price + '₩' + '<br>';
+                        p.appendChild(originPrice);
+
+                        let discount = document.createElement('span');
+                        discount.setAttribute('class', 'fs-4 text-danger');
+                        discount.innerHTML = '-' + homeDto.discount + '% ';
+                        p.appendChild(discount);
+
+                        let eventPrice = document.createElement('span');
+                        eventPrice.setAttribute('class', 'fs-4');
+                        eventPrice.innerHTML = homeDto.eventPrice + '₩';
+                        p.appendChild(eventPrice);
+                    }else{
+                        let originPrice = document.createElement('span');
+                        originPrice.setAttribute('class', 'fs-4');
+                        originPrice.innerHTML = homeDto.price + '₩' + '<br>';
+                        p.appendChild(originPrice);
+                    }
+                    cardBody.appendChild(p);
+
+                    let itemLink = document.createElement('a');
+                    itemLink.setAttribute('class', 'stretched-link');
+                    itemLink.href = '/item/main?item=' + homeDto.id;
+                    cardBody.appendChild(itemLink);
+
+                    cardDiv.appendChild(cardBody);
+                    parentDiv.appendChild(cardDiv);
+                    itemDiv.appendChild(parentDiv);
+                    fetchReady = true;
+                }
+
+            }
+        });
+    }
+</script>
+
+<script th:fragment="itemContentLimit">
+    let cardBodies = document.getElementsByTagName('p');
+    for (let cardBody of cardBodies) {
+        changeCardBody(cardBody);
+    }
+
+    function changeCardBody(cardBody) {
+        let orgText = cardBody.innerText;
+        let newText = orgText.replace(/(<([^>]+)>)/ig, "");
+        let cardText;
+        if (newText == "") {
+            cardText = newText.substring(0, 30);
+        } else {
+            cardText = newText.substring(0, 30) + "...";
+        }
+        cardBody.innerText = cardText;
+    }
+</script>
+
+</html>

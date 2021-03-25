@@ -1,0 +1,55 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div th:block class="col-md-12" th:replace="fragment/common_nav :: nav">Navbar</div>
+        <div class="col-md-12" style="height: 50px;"></div>
+            <div class="col-md-5 bg-light">
+                <div class="alert alert-danger" role="alert" th:if="${param.error}">
+                    <h3 class="text-center" th:text="${errorTitle}">로그인 실패</h3>
+                    <h5 class="text-center" th:text="${errorMsg}"> 아이디 또는 비밀번호가 일치하지 않습니다.</h5>
+                </div>
+            <form th:method="post" th:action="@{/members/signin}" class="row g-3 needs-validation" novalidate>
+                <div class="form-group">
+                    <label for="inputEmail3" class="col-md-2 col-form-label">Email</label>
+                    <input type="email" class="form-control" id="inputEmail3" name="username" required>
+                    <small class="text-muted">가입시 등록한 이메일을 입력해주세요.</small>
+                    <small class="invalid-feedback form-text text-danger">이메일은 필수항목입니다.</small>
+                </div>
+                <div class="form-group">
+                    <label for="inputPassword3" class="col-md-2 col-form-label">Password</label>
+                    <input type="password" class="form-control" id="inputPassword3" name="password" required>
+                    <small class="text-muted">비밀번호를 입력해주세요.</small>
+                    <small class="invalid-feedback form-text text-danger">비밀번호는 필수항목입니다.</small>
+                </div>
+                <hr/>
+                <div class="form-group" th:unless="${isLocked}">
+                    <div class="d-grid gap-2">
+                        <button class="btn btn-primary" type="submit">로그인</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <input id="rememberme" type="checkbox" class="form-check-input" name="duringLogin"/>
+                    <label for="rememberme" class="form-label text-muted"><small class="text-muted">로그인 유지하기</small></label>
+                </div>
+
+                <div class="form-group">
+                    <small class="text-muted">아이디 혹은 비밀번호가 기억나지 않으시면 <a th:href="@{/members/forgot/email}">아이디 찾기</a> 또는 <a th:href="@{/members/forgot/password}">비밀번호 찾기</a>를 </br> 이용해주세요</small>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:replace="fragment/common_parts :: form-validation"></script>
+
+</body>
+</html>

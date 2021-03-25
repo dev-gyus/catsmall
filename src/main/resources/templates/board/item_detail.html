@@ -1,0 +1,207 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.getToken()}"/>
+    <meta name="_csrf_header" th:content="${_csrf.getHeaderName()}"/>
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+
+    <style>
+        #star span {
+            text-decoration: none;
+            color: gray;
+        }
+
+        #star span.on {
+            color: #ffd700;
+        }
+    </style>
+    <script>
+        $(document).ready(function () {
+            // a href='#' 클릭 무시 스크립트
+            $('a[href="#"]').click(function (ignore) {
+                ignore.preventDefault();
+            });
+        });
+    </script>
+</head>
+<body>
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div th:block th:replace="fragment/common_nav :: nav"></div>
+        <div class="col-md-12" style="height: 10px"></div>
+        <div class="col-md-2 bg-light text-center">
+            <div th:replace="fragment/common_side_nav :: nav"></div>
+        </div>
+        <div class="col-md-10">
+            <div class="row g-3">
+                <div class="col-md-7">
+                    <img class="img-fluid" alt="..." th:src="@{'/upload/thumbnail/' + ${item.getThumbnailName()}}"/>
+                </div>
+                <div class="col-md-5 bg-light d-flex">
+                    <div class="row">
+                        <div class="col-md-12" style="font-size: 20px">
+                            <span>상품명: </span><span th:text="${item.getName()}">상품명</span>
+                            <hr>
+                            <div th:if="${item.itemStatus != T(catsmall.cat.entity.item.ItemStatus).SOLDOUT}">
+                            <span th:if="${!item.isEvent()}">
+                                <span>가격: </span><span th:text="${item.getPrice()}">가격</span><br>
+                            </span>
+                                <span th:if="${item.isEvent()}">
+                                <span>가격: </span><span th:text="${item.getPrice() + '₩'}"
+                                                       class="text-decoration-line-through">가격</span><br>
+                                <span>행사가: </span><span th:text="${item.getEventPrice() + '₩'}" class="fs-4"></span>
+                                <span th:text="${'-' + item.getDiscount() + '%'}" class="text-danger"></span><br>
+                            </span>
+                                <span>구매가능수량: </span><span th:text="${item.getQuantity()} + '개'">구매 가능 수량</span>
+                                <div class="col-md-12" style="font-size: 20px">
+                                    <label for="purchaseAmount" class="form-label">구매 수량</label>
+                                    <input type="number" id="purchaseAmount" class="form-control" placeholder="구매수량"
+                                           aria-describedby="purchaseAmountHelp"/>
+                                    <small class="form-text" id="purchaseAmountHelp">최소 1개이상, 구매 가능 수량보다 적은 값을
+                                        입력해주세요.</small><br>
+                                    <small class="form-text text-danger" th:if="${hasErrors}">올바른 수량을 입력해주세요.</small>
+                                </div>
+
+                                <div sec:authorize="isAuthenticated()" class="col-md-12 align-self-end d-grid">
+                                    <button type="button" class="btn btn-primary" id="add_cart">장바구니</button>
+                                </div>
+                                <div class="col-md-12 align-self-end d-grid">
+                                    <button type="button" id="pbutton" class="btn btn-success" onclick="purchase()">구매하기
+                                    </button>
+                                </div>
+                            </div>
+                            <div class="col-md-12"
+                                 th:if="${item.itemStatus == T(catsmall.cat.entity.item.ItemStatus).SOLDOUT && !isZzimed}">
+                                <form th:action="@{'/zzim/' + ${item.id} + '/add'}" method="post" class="row">
+                                    <div class="col-md-12">현재상태: 품절</div>
+                                    <div class="col-md-12 d-grid">
+                                        <button type="submit" class="btn btn-success" onclick="purchase()">
+                                            찜하기
+                                        </button>
+                                        <small class="form-text">찜하기를 설정해두시면 재입고시 알려드려요!</small>
+                                    </div>
+                                </form>
+                            </div>
+                            <div class="col-md-12"
+                                 th:if="${(item.itemStatus == T(catsmall.cat.entity.item.ItemStatus).SOLDOUT) && isZzimed}">
+                                <form th:action="@{'/zzim/' + ${item.id} + '/delete'}" method="post" class="row">
+                                    <div class="col-md-12">현재상태: 품절</div>
+                                    <div class="col-md-12 d-grid">
+                                        <button type="submit" class="btn btn-success" onclick="purchase()">
+                                            찜하기 해제
+                                        </button>
+                                        <small class="form-text">찜하기를 설정해두시면 재입고시 알려드려요!</small>
+                                    </div>
+                                </form>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <hr class="mb-1">
+                <div class="col-md-12" style="overflow: auto" th:utext="${item.content}"></div>
+                <hr>
+                <div class="col-md-12" th:each="review : ${reviewList.getContent()}">
+                    <div class="row">
+                        <div class="col-md-1">
+                            <img th:src="${review.member.profileImage}" width="50px"/>
+                        </div>
+                        <div class="col-md-6 fs-4" th:text="${review.member.nickname}"></div>
+                        <div class="col-md-5 text-end" th:if="${memberId != null && review.member.id == memberId}">
+                            <form th:action="@{'/review/' + ${review.id} + '/delete?item=' + ${item.id}}" method="post">
+                                <button class="btn btn-outline-danger" type="submit">리뷰 삭제</button>
+                            </form>
+                        </div>
+                        <div class="col-md-12">
+                        <span id="star" class="fs-3" th:each="num : ${#numbers.sequence(1, 5)}">
+                            <span class="on" th:if="${num <= review.starPoint}">★</span>
+                            <span th:if="${num > review.starPoint}">★</span>
+                        </span>
+                        </div>
+                        <div class="col-md-5" th:utext="${review.content}"></div>
+                        <hr>
+                    </div>
+                </div>
+                <div class="col-md-12" th:if="${!reviewList.getContent().isEmpty()}">
+                    <nav aria-label="Page navigation example justify-content-center">
+                        <ul class="pagination">
+                            <li class="page-item" th:classappend="${reviewList.isFirst()} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/item/main?item=' + ${item.id} + '&page=' + ${startPage - 1}}" aria-label="Previous">
+                                    <span aria-hidden="true">&laquo;</span>
+                                </a>
+                            </li>
+                            <li class="page-item" th:each="number : ${#numbers.sequence(startPage,endPage)}"
+                                th:classappend="${number == reviewList.getNumber()} ? 'active'">
+                                <a class="page-link"
+                                   th:href="@{'/item/main?item=' + ${item.id} + '&page=' + ${number}}" th:text="${number + 1}">1</a>
+                            </li>
+                            <li class="page-item" th:classappend="${reviewList.isLast()} ? 'disabled'">
+                                <a class="page-link" th:href="@{'/item/main?item=' + ${item.id} + '&page=' + ${endPage + 1}}" aria-label="Next">
+                                    <span aria-hidden="true">&raquo;</span>
+                                </a>
+                            </li>
+                        </ul>
+                    </nav>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+    <script>
+
+        function purchase() {
+            let purchaseAmount = document.getElementById('purchaseAmount');
+            let count = purchaseAmount.value;
+            if (count == "" || count <= 0) {
+                alert('구매 수량은 최소 1개이상 입력해주세요');
+                purchaseAmount.value = 1;
+                return;
+            }
+            window.location.href = '/order/' + '[[${item.id}]]' + '?count=' + count;
+        }
+    </script>
+
+    <script>
+        let add_cart = $('#add_cart');
+        let token = $("meta[name='_csrf']").attr('content');
+        let header = $("meta[name='_csrf_header']").attr('content');
+        $('document').ready(function () {
+            $('#add_cart').on('click', function () {
+                addItem()
+            })
+        })
+
+        function addItem() {
+            let purchaseAmountInput = $('#purchaseAmount');
+            let itemId = '[[${item.getId()}]]';
+            let data = {
+                'itemId': itemId,
+                'count': purchaseAmountInput.val()
+            }
+
+            $.ajax({
+                url: '/cart/' + itemId + '/add',
+                type: 'post',
+                data: JSON.stringify(data),
+                contentType: 'application/json',
+                beforeSend(xhr) {
+                    xhr.setRequestHeader(header, token);
+                },
+                success: function () {
+                    alert('물품이 장바구니에 추가되었습니다.');
+                    window.location.reload();
+                },
+                error: function (jqXHR) {
+                    alert('장바구니에 물건 추가중 에러가 발생하였습니다. 계속되면 관리자에게 문의해주세요.');
+                    window.location.reload();
+                }
+            })
+        }
+    </script>
+
+</body>
+</html>

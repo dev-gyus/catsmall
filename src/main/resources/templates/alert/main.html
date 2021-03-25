@@ -1,0 +1,72 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-3 justify-content-center">
+        <div th:block th:replace="fragment/common_nav :: nav"> Nav</div>
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-3 list-group">
+                    <a th:href="@{/alert}" class="list-group-item list-group-item-action" th:classappend="${!nowPage}? 'active'" aria-current="true">
+                        읽지 않은 알림 <span class="badge rounded-pill bg-danger" th:text="${count}">99+</span>
+                    </a>
+                    <a th:href="@{/alert?read=true}" class="list-group-item list-group-item-action" th:classappend="${nowPage}? 'active'">
+                        읽은 알림
+                    </a>
+                </div>
+                <div class="col-md-9 fs-5">
+                    <div class="row">
+                        <div class="bg-light mb-4">
+                            <h3>재입고 알림</h3>
+                            <hr class="mt-1">
+                            <div th:if="${zzimAlertList.isEmpty()}">
+                                <p>목록이 비어있네요!</p>
+                            </div>
+                            <div th:if="${!zzimAlertList.isEmpty()}">
+                                <div class="position-relative" th:each="zzimAlert : ${zzimAlertList}">
+                                    <p>
+                                    <div class="text-end fs-6" th:text="${#temporals.format(zzimAlert.regDate, 'yyyy-MM-dd')}"></div>
+                                        <i class="fa fa-bell-o" aria-hidden="true">
+                                            <span class="fs-5" th:text="${zzimAlert.subject}"></span>
+                                        </i><br>
+                                        <span class="fs-5" th:text="${zzimAlert.content}"></span><br>
+                                        <a th:href="@{'/item/main?item=' + ${zzimAlert.itemId}}" class="stretched-link"></a>
+                                    <hr>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="bg-light">
+                            <h3>기타 알림목록</h3>
+                            <hr class="mt-1">
+                            <div th:if="${alertList.isEmpty()}">
+                                <p>목록이 비어있네요!</p>
+                            </div>
+                            <div th:if="${!alertList.isEmpty()}">
+                                <div th:each="alert : ${alertList}">
+                                    <p>
+                                        <i class="fa fa-bell-o" aria-hidden="true">
+                                            <span class="fs-5" th:text="${alert.subject}"></span>
+                                        </i><br>
+                                        <span class="fs-5" th:text="${alert.content}"></span>
+                                    <hr>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

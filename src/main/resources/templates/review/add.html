@@ -1,0 +1,138 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" th:content="${_csrf.headerName}">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+    <style>
+        #star a {
+            text-decoration: none;
+            color: gray;
+        }
+
+        #star a.on {
+            color: #ffd700;
+        }
+    </style>
+    <script>
+        $(document).ready(function() {
+            // a href='#' 클릭 무시 스크립트
+            $('a[href="#"]').click(function(ignore) {
+                ignore.preventDefault();
+            });
+        });
+    </script>
+</head>
+<body>
+<div th:replace="fragment/common_nav :: nav"></div>
+
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h2>리뷰 쓰기</h2>
+                </div>
+                <hr class="m-1">
+                <form id="reviewForm" th:action="@{'/review/' + ${orderId} +'/add'}" method="post" class="row" th:object="${reviewDto}">
+
+                    <div class="col-md-12 bg-light" th:each="item : ${itemList}">
+                        <input th:id="'starPoint[' + ${itemStat.index} + ']'" type="hidden" class="starPoint"
+                               th:name="'starPoint[' + ${itemStat.index} + ']'" value="1"/>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <img th:src="@{'/upload/thumbnail/' + ${item.getThumbnailName()}}" width="150px"/>
+                            </div>
+                            <div class="col-md-6 fs-4" th:text="${'상품명: ' + item.name}"></div>
+                            <div class="col-md-12">
+                                <p id="star" class="fs-1">
+                                    <!-- 부모 -->
+                                    <a href="#" value="1" class="on">★</a>
+                                    <!-- 자식들-->
+                                    <a href="#" value="2">★</a>
+                                    <a href="#" value="3">★</a>
+                                    <a href="#" value="4">★</a>
+                                    <a href="#" value="5">★</a>
+                                </p>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <textarea class="summernote" th:name="'content[' + ${itemStat.index} + ']'"></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-12 d-grid text-center mb-5">
+                        <button id="formBtn" type="submit" class="btn btn-outline-success">작성 완료</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    $(document).ready(function () {
+        //여기 아래 부분
+        $('.summernote').summernote({
+            height: 200,                 // 에디터 높이
+            minHeight: null,             // 최소 높이
+            maxHeight: null,             // 최대 높이
+            focus: true,                  // 에디터 로딩후 포커스를 맞출지 여부
+            lang: "ko-KR",					// 한글 설정
+            placeholder: '제품에 대해 좋으셨던 점이나, 개선해야 될 점이 있다면 꼭 적어주세요!',	//placeholder 설정
+            callbacks: {	//여기 부분이 이미지를 첨부하는 부분
+                onImageUpload: function (files) {
+                    uploadSummernoteImageFile(files[0], this);
+                },
+                onPaste: function (e) {
+                    var clipboardData = e.originalEvent.clipboardData;
+                    if (clipboardData && clipboardData.items && clipboardData.items.length) {
+                        var item = clipboardData.items[0];
+                        if (item.kind === 'file' && item.type.indexOf('image/') !== -1) {
+                            e.preventDefault();
+                        }
+                    }
+                }
+            }
+        });
+    });
+
+    /**
+     * 이미지 파일 업로드
+     */
+    function uploadSummernoteImageFile(file, editor) {
+        let token = $("meta[name='_csrf']").attr('content');
+        let header = $("meta[name='_csrf_header']").attr('content');
+        data = new FormData();
+        data.append("image", file);
+        $.ajax({
+            data : data,
+            type : "POST",
+            url : "/review/api/image",
+            contentType : false,
+            processData : false,
+            beforeSend(xhr){
+                xhr.setRequestHeader(header, token);
+            },
+            success : function(data) {
+                console.log(data.url);
+                //항상 업로드된 파일의 url이 있어야 한다.
+                $(editor).summernote('insertImage', data.url);
+            },
+            errors : function(){
+              alert('이미지 업로드 실패. 계속 반복되면 관리자에게 문의해주세요');
+            }
+        });
+    }
+
+        $('#star a').click(function () {
+            $(this).parent().children("a").removeClass("on");
+            $(this).addClass("on").prevAll("a").addClass("on");
+            $(this).parent().parent().parent().parent().children(".starPoint").val($(this).attr('value'));
+        });
+</script>
+
+</body>
+</html>

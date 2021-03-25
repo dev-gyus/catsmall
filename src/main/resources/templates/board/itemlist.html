@@ -1,0 +1,61 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-2 justify-content-center">
+        <div th:block th:replace="fragment/common_nav :: nav"> Nav</div>
+        <div class="col-md-2 bg-light text-center">
+            <nav class="nav flex-column">
+                <a class="nav-link btn btn-primary" th:each="children : ${childrenCategories}"
+                   th:class="${#request.getAttribute('category') == children.name} ? 'nav-link btn btn-primary' : 'nav-link'"
+                   th:text="${children.name}" aria-current="page" href="#"
+                   th:href="@{'/board?category=' + ${children.name} +  '&type=' + ${type}}">Active</a>
+            </nav>
+        </div>
+        <div class="col-md-10" th:if="${items.isEmpty()}">
+            <h2 class="text-center">앗!..</h2>
+            <h3 class="text-center">아직 상품이 준비되지 않았네요. 빠르게 준비할게요!</h3>
+            <div class="text-center">
+                <button type="button" onclick="history.back()" class="btn btn-outline-primary">뒤로 가기</button>
+            </div>
+        </div>
+        <div class="col-md-10" th:if="${!items.isEmpty()}">
+            <div id="itemDiv" class="row g-3">
+                <div th:each="item : ${items}" class="col-md-6">
+                    <div class="card">
+                        <img src="..." th:src="@{'/upload/thumbnail/' + ${item.getThumbnailName()}}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 th:text="${item.getName()}" class="card-title">Item name</h5>
+                            <p class="card-text" th:text="${item.getContent()}"></p>
+                            <div class="card-text text-end" th:if="${!item.isEvent()}">
+                                <span class="card-text text-end fs-4" th:text="${item.getPrice() + '₩'}"></span>
+                            </div>
+                            <div class="card-text text-end" th:if="${item.isEvent()}">
+                                <span class="text-decoration-line-through fs-4" th:text="${item.getPrice() + '₩'}"></span><br>
+                                <span class="text-danger fs-4" th:text="${'-'+ item.getDiscount() + '%'}"></span>
+                                <span class="fs-4" th:text="${item.getEventPrice() + '₩'}"></span>
+                            </div>
+                                <a href="/item"
+                                   th:href="@{'item/main?item=' + ${item.id}}"
+                                   class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:replace="fragment/common_parts :: itemContentLimit"></script>
+
+<script th:replace="fragment/common_parts :: infinityScrollPaging (20, 0, 'col-md-6', ${category}, ${type}, false)"></script>
+
+</body>
+</html>

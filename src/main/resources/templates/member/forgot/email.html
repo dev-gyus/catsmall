@@ -1,0 +1,43 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div th:block class="col-md-12" th:replace="fragment/common_nav :: nav">Navbar</div>
+        <div class="col-md-12" style="height: 50px;"></div>
+        <div class="col-md-5 bg-light">
+            <h2> 아이디 찾기 </h2><hr>
+            <form th:method="post" th:action="@{/members/forgot/email}" th:object="${forgotEmail}" class="row g-3 needs-validation" novalidate>
+                <div class="alert alert-danger" role="alert" th:if="${#fields.hasGlobalErrors()}">
+                    <h3 class="text-center">아이디 찾기 실패</h3>
+                    <h5 class="text-center"> 입력하신 정보의 계정이 존재하지 않습니다.</h5>
+                </div>
+                <div class="form-group">
+                    <label for="name" class="form-label">이름</label>
+                    <input id="name" type="text" class="form-control" name="name" required/>
+                </div>
+
+                <div class="form-group">
+                    <label for="phonenum" class="form-label">휴대폰번호</label>
+                    <input id="phonenum" type="text" class="form-control" name="phonenum" required/>
+                </div>
+
+                <div class="form-group d-grid mb-2">
+                    <button type="submit" class="btn btn-outline-primary">아이디 찾기</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<script th:replace="fragment/common_parts :: form-validation"></script>
+
+</body>
+</html>

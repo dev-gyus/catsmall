@@ -1,0 +1,86 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div th:replace="fragment/common_nav :: nav"></div>
+
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div class="col-md-2">
+            <div th:replace="member/mypage/mypagenav.html :: nav('주문배송조회')"></div>
+        </div>
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h2>주문/배송 조회</h2>
+                </div>
+                <hr class="m-1">
+                <div class="col-md-12 text-center" th:if="${orderMainDtos.isEmpty()}">
+                    <h3>구매내역이 없습니다</h3>
+                    <h4>집사님의 소중한 냥이를 위한 선물로 채워보시는건 어떨까요?</h4>
+                    <a href="#" class="btn btn-outline-primary">선물사러 쓩~</a>
+                </div>
+                <div class="col-md-12 bg-light" th:each="orderMainDto : ${orderMainDtos}">
+                    <div class="row">
+                        <div class="col-md-3" th:text="${'주문번호: ' + orderMainDto.getOrderId()}"></div>
+                        <div class="col-md-5"></div>
+                        <div class="col-md-4 text-end"
+                             th:text="${'주문일자: ' + #temporals.format(orderMainDto.getOrderDate(), 'yyyy-MM-dd')}"></div>
+                        <div class="col-md-12" th:each="orderItem : ${orderMainDto.getOrderItemList()}">
+                            <table class="table table-stripe vertical-center text-center">
+                                <thead>
+                                <tr>
+                                    <th scope="col">상품이미지</th>
+                                    <th scope="col">상품명</th>
+                                    <th scope="col">주문가격</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr>
+                                    <td>
+                                        <div class="position-relative">
+                                            <img th:src="@{'/upload/thumbnail/' + ${orderItem.item.thumbnailName}}" width="100px"/>
+                                            <a th:href="@{'/item/main?item=' + ${orderItem.item.id}}" class="stretched-link"></a>
+                                        </div>
+                                    </td>
+                                    <td class="align-middle fs-5" th:text="${orderItem.item.name}"></td>
+                                    <td class="align-middle fs-5" th:text="${orderItem.orderPrice}"></td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="col-md-3" th:text="${'주문상태: ' + orderMainDto.getOrderStatus()}"></div>
+                        <div class="col-md-3" th:text="${'배송상태: ' + orderMainDto.getDeliveryStatus()}"></div>
+                        <div class="col-md-6 justify-content-end"
+                             th:unless="${orderMainDto.getOrderStatus() == T(catsmall.cat.order.OrderStatus).COMPLETED ||
+                                        orderMainDto.getDeliveryStatus() == T(catsmall.cat.delivery.DeliveryStatus).COMPLETED}">
+                            <form th:action="@{'/order/' + ${orderMainDto.getOrderId()} + '/cancel'}" method="post"
+                                  class="row">
+                                <div class="d-grid">
+                                    <button type="submit" class="btn btn-outline-danger">주문 취소</button>
+                                </div>
+                            </form>
+                        </div>
+                        <div class="col-md-6 justify-content-end"
+                             th:if="${orderMainDto.getOrderStatus() == T(catsmall.cat.order.OrderStatus).COMPLETED &&
+                                        orderMainDto.getDeliveryStatus() == T(catsmall.cat.delivery.DeliveryStatus).COMPLETED
+                                        && !orderMainDto.isReviewed()}">
+                                <div class="d-grid">
+                                    <a th:href="@{'/review/' + ${orderMainDto.getOrderId()} + '/add'}" class="btn btn-outline-success">리뷰 쓰기</a>
+                                </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

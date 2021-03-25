@@ -1,0 +1,228 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" id="_csrf" th:content="${_csrf.token}">
+    <meta name="_csrf_header" id="_csrf_header" th:content="${_csrf.headerName}">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-12" th:replace="admin/fragment/admin_nav :: admin_nav('상품관리')"></div>
+        <div class="col-md-10 bg-light">
+            <div class="row g-2">
+                <div class="col-md-12 mb-1 fs-3">상품 관리 <hr class="m-0"></div>
+                <div class="col-md-2 fs-5">상품타입</div>
+                <div class="col-md-3">
+                    <select id="itemType" class="form-select" name="itemType">
+                        <option th:each="category : ${categories}"
+                                th:value="${category.getName()}" th:text="${category.getName()}"></option>
+                    </select>
+                </div>
+                <div class="col-md-12">
+                    <div class="alert alert-danger" th:if="${statusError != null}">
+                        <span text="text-danger" th:text="${statusError}"></span>
+                    </div>
+                    <table class="table table-striped table-hover text-center">
+                        <thead>
+                            <tr>
+                                <th scope="col">상품 이미지</th>
+                                <th scope="col">상품명</th>
+                                <th scope="col">정상가격</th>
+                                <th scope="col">판매가격</th>
+                                <th scope="col">할인율</th>
+                                <th scope="col">재고</th>
+                                <th scope="col">상품상태</th>
+                                <th scope="col">비고</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">상품 삭제</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                ...
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <form id="modalForm" th:action="@{#}" method="post">
+                    <button type="submit" class="btn btn-primary">삭제</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<script>
+    let itemType = document.getElementById('itemType');
+    let token = $('meta[name="_csrf"]').attr('content');
+    let header = $("meta[name='_csrf_header']").attr('content');
+    let tbody = document.getElementById('tbody');
+    let exampleModal = document.getElementById('exampleModal');
+    let modalForm = document.createElement('modalForm');
+    let size = 10;
+    let page = 0;
+    let hasNext = true;
+    let fetchReady = true;
+
+    // 페이징
+    $(function(){
+        $(window).scroll(function(){
+            let $window = $(this);
+            let scrollTop = $window.scrollTop();
+            let windowHeight = $window.height();
+            let documentHeight = $(document).height();
+
+            // scrollbar의 thumb가 바닥 전 30px까지 도달 하면 리스트를 가져온다.
+            if( (scrollTop + windowHeight + 30) > documentHeight && hasNext && fetchReady){
+                addItemList(size, ++page);
+                fetchReady = false;
+            }
+        })
+    });
+
+
+    document.addEventListener('DOMContentLoaded', function(){
+        addItemList(10, 0); // 초기 상품목록 불러오기용
+
+        exampleModal.addEventListener('show.bs.modal', function (event) {
+            // Button that triggered the modal
+            var button = event.relatedTarget
+            // Extract info from data-bs-* attributes
+            var action = button.getAttribute('data-bs-action');
+            var itemName = button.getAttribute('data-bs-itemName');
+            // If necessary, you could initiate an AJAX request here
+            // and then do the updating in a callback.
+            //
+            // Update the modal's content.
+            var modalTitle = exampleModal.querySelector('.modal-title');
+            var modalBody = exampleModal.querySelector('.modal-body');
+            let modalForm = exampleModal.querySelector('#modalForm');
+
+            modalBody.innerHTML = itemName + '을 삭제하시겠습니까?';
+            modalForm.action = action;
+        })
+        itemType.addEventListener('change', function(){
+            while(tbody.hasChildNodes()){
+                tbody.removeChild(tbody.firstChild);
+            }
+            size = 10;
+            page = 0;
+            hasNext = true;
+            addItemList(size, page);
+        });
+    });
+
+    function addItemList(size, page){
+        page = page++;
+        let type = itemType.value;
+        let data = {
+            'category' : type
+        };
+        $.ajax({
+            url: '/admin/api/find-item-list?size=' + size + '&page=' + page,
+            type: 'post',
+            data: JSON.stringify(data),
+            contentType:'application/json',
+            dataType: 'json',
+            beforeSend: function(xhr){
+                xhr.setRequestHeader(header, token);
+            },
+            success: function(result){
+                let findItemList = result.findItemList;
+
+                for (let findItem of findItemList) {
+                    let tr = document.createElement('tr');
+                    let tdImg = document.createElement('td');
+                    let tdName = document.createElement('td');
+                    let tdPrice = document.createElement('td');
+                    let tdRealPrice = document.createElement('td');
+                    let tdDiscount = document.createElement('td');
+                    let tdQuantity = document.createElement('td');
+                    let tdButtons = document.createElement('td');
+                    let tdStatus = document.createElement('td');
+                    let itemId = findItem.itemId;
+
+                    let img = document.createElement('img');
+                    img.src = '/upload/thumbnail/' + findItem.thumbnailName;
+                    img.width = 150;
+                    tdImg.appendChild(img);
+
+                    tdName.innerHTML = findItem.itemName;
+                    if(!findItem.event){
+                        tdPrice.innerHTML = findItem.price;
+                        tdRealPrice.innerHTML = findItem.price;
+                        tdDiscount.innerHTML = '0%';
+                    }else{
+                        tdPrice.innerHTML = findItem.price;
+                        tdRealPrice.innerHTML = findItem.eventPrice;
+                        tdDiscount.innerHTML = findItem.discount + '%';
+                    }
+                    tdQuantity.innerHTML = findItem.quantity;
+                    tdStatus.innerHTML = findItem.itemStatus;
+
+                    let modifyLink = document.createElement('a');
+                    modifyLink.href = '/admin/manage/item/' + itemId + '/modify';
+                    modifyLink.setAttribute('class', 'btn btn-outline-primary');
+                    modifyLink.innerHTML = '수정';
+                    tdButtons.appendChild(modifyLink);
+
+                    let deleteBtn = document.createElement('button');
+                    deleteBtn.type = 'button';
+                    deleteBtn.setAttribute('class', 'btn btn-outline-danger');
+                    deleteBtn.innerHTML = '삭제';
+
+                    deleteBtn.setAttribute('data-bs-toggle', 'modal');
+                    deleteBtn.setAttribute('data-bs-target', '#exampleModal');
+                    deleteBtn.setAttribute('data-bs-itemName', findItem.itemName);
+                    deleteBtn.setAttribute('data-bs-action', '/admin/manage/item/' + itemId + '/delete');
+                    tdButtons.appendChild(deleteBtn);
+
+                    let changeStatForm = document.createElement('form');
+                    changeStatForm.action = '/admin/manage/item/' + itemId + '/change-stat?_csrf=' + token;
+                    changeStatForm.method = 'post';
+
+                    let changeStatBtn = document.createElement('button');
+                    changeStatBtn.type = 'submit';
+                    changeStatBtn.setAttribute('class', 'btn btn-outline-success');
+                    changeStatBtn.innerHTML = '상태 변경';
+                    changeStatForm.appendChild(changeStatBtn);
+                    tdStatus.appendChild(changeStatForm);
+
+                    tr.appendChild(tdImg);
+                    tr.appendChild(tdName);
+                    tr.appendChild(tdPrice);
+                    tr.appendChild(tdRealPrice);
+                    tr.appendChild(tdDiscount);
+                    tr.appendChild(tdQuantity);
+                    tr.appendChild(tdStatus);
+                    tr.appendChild(tdButtons);
+                    tbody.appendChild(tr);
+                    hasNext = result.hasNext;
+                    fetchReady = true;
+                }
+            },
+            error: function(){
+                alert('상품 리스트를 불러오던중 에러가 발생했습니다.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,22 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="admin_nav (nowPage)">
+    <div class="col-md-12 position-relative text-center">
+        <div style="font-size: 30px">Cats Mall</div>
+        <div style="font-size: 20px">관리자 페이지</div>
+        <a href="/admin" class="stretched-link"></a>
+    </div>
+    <hr>
+    <div class="col-md-2">
+        <nav class="nav flex-column">
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin}" th:classappend="${nowPage == '대시보드'} ? active">대시보드</a>
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin/addcategory}" th:classappend="${nowPage == '카테고리관리'} ? active">카테고리 관리</a>
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin/manage/item}" th:classappend="${nowPage == '상품관리'} ? active">상품 관리</a>
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin/additem}" th:classappend="${nowPage == '상품등록'} ? active">상품 등록</a>
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin/manage/member}" th:classappend="${nowPage == '회원관리'} ? active">회원 관리</a>
+            <a class="nav-link btn btn-outline-primary mb-1" th:href="@{/admin/manage/item}" th:classappend="${nowPage == '통계'} ? active">통계</a>
+        </nav>
+    </div>
+</th:block>
+</html>

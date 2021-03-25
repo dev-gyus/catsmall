@@ -1,0 +1,137 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.getToken()}"/>
+    <meta name="_csrf_header" th:content="${_csrf.getHeaderName()}"/>
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-2" th:replace="admin/fragment/admin_nav :: admin_nav('회원관리')"></div>
+        <div class="col-md-10 bg-light">
+            <div class="row g-3">
+                <div class="col-md-12 fs-3">회원 관리
+                    <hr class="m-0">
+                </div>
+
+                <table class="table table-striped table-hover">
+                    <thead>
+                    <tr>
+                        <th scope="col">#</th>
+                        <th>이메일</th>
+                        <th>닉네임</th>
+                        <th>이름</th>
+                        <th>전화번호</th>
+                        <th>가입일</th>
+                        <th>권한</th>
+                        <th>정지</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="member : ${memberList}">
+                        <th scope="row" th:text="${memberStat.count}"></th>
+                        <td th:text="${member.email}">Mark</td>
+                        <td th:text="${member.nickname}">Otto</td>
+                        <td th:text="${member.name}">@mdo</td>
+                        <td th:text="${member.phonenum}">@mdo</td>
+                        <td th:text="${#temporals.format(member.regDate, 'yyyy-MM-dd')}">@mdo</td>
+                        <td th:text="${member.role}">@mdo</td>
+                        <td>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                    th:data-bs-body="${member.email}" th:data-bs-title="계정정지"
+                                    th:data-bs-url="block-user" th:data-bs-subText="' 계정을 정지시키시겠습니까?'"
+                                    data-bs-target="#exampleModal"
+                                    th:if="${!member.isBlocked()}">계정정지
+                            </button>
+                            <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal"
+                                    th:data-bs-body="${member.email}" th:data-bs-title="정지해제"
+                                    th:data-bs-url="unblock-user" th:data-bs-subText="' 계정을 정지해제하시겠습니까?'"
+                                    data-bs-target="#exampleModal"
+                                    th:if="${member.isBlocked()}">정지해제
+                            </button>
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+
+<div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLabel">계정정지</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <h4>주의!</h4>
+                <span id="useremail" class="fs-5"></span><span id="subText" class="text-danger fs-5"></span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-danger" onclick="blockUser()">확인</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    var exampleModal = document.getElementById('exampleModal')
+    let useremail = document.getElementById('useremail');
+    let url;
+    let subTextObject = document.getElementById('subText');
+    let subText;
+    let title;
+    var token = $("meta[name='_csrf']").attr("content");
+    var header = $("meta[name='_csrf_header']").attr("content");
+    exampleModal.addEventListener('show.bs.modal', function (event) {
+        // Button that triggered the modal
+        var button = event.relatedTarget
+        // Extract info from data-bs-* attributes
+        var recipient = button.getAttribute('data-bs-body')
+        title = button.getAttribute('data-bs-title')
+        url = button.getAttribute('data-bs-url');
+        subText = button.getAttribute('data-bs-subText');
+        // If necessary, you could initiate an AJAX request here
+        // and then do the updating in a callback.
+        //
+        // Update the modal's content.
+        var modalTitle = exampleModal.querySelector('.modal-title')
+        var modalBodyInput = exampleModal.querySelector('.modal-body input')
+
+        modalTitle.innerText = title;
+        useremail.innerText = recipient;
+        subTextObject.innerText = subText;
+    })
+
+    function blockUser(){
+        let data = {
+            'email' : useremail.innerText
+        };
+        $.ajax({
+            url: '/admin/api/' + url,
+            type: 'post',
+            data: JSON.stringify(data),
+            contentType: 'application/json',
+            beforeSend: function(xhr){
+                xhr.setRequestHeader(header, token);
+            },
+            success: function(){
+                window.location.href = '/admin/manage/member';
+            },
+            error: function(){
+                alert('서버 통신 실패. 오류가 반복되면 관리자에게 문의해 주시기 바랍니다.');
+            }
+        });
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div th:replace="fragment/common_nav :: nav"></div>
+
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div class="col-md-2">
+            <div th:replace="member/mypage/mypagenav.html :: nav('찜목록')"></div>
+        </div>
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h2>찜목록</h2>
+                </div>
+                <hr class="m-1">
+                <div class="col-md-12 position-relative" th:each=" zzimItem : ${zzimItemList}">
+                    <div class="row">
+                        <div class="col-md-3 position-relative">
+                            <img width="200px" th:src="@{'/upload/thumbnail/' + ${zzimItem.thumbnailName}}"/>
+                            <a th:href="@{'/item/main?item=' + ${zzimItem.id}}" class="stretched-link"></a>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="row">
+                                <div class="col-md-12 fs-5">
+                                    <span>상품명 : </span> <span th:text="${zzimItem.name}"></span>
+                                </div>
+                                <div class="col-md-5">
+                                    <form th:action="@{'/zzim/'+ ${zzimItem.id} + '/delete'}" method="post"
+                                          class="d-grid">
+                                        <button type="submit" class="btn btn-outline-success">찜하기 해제</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

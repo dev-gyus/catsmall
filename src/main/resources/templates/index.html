@@ -1,0 +1,159 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_carf_header" th:content="${_csrf.headerName}">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row">
+        <div class="col-md-12">
+            <th:block th:replace="fragment/common_nav :: nav"></th:block>
+        </div>
+        <div class="col-md-12">
+            <div id="carouselExampleIndicators" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-indicators">
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="0"
+                            class="active" aria-current="true" aria-label="Slide 1"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="1"
+                            aria-label="Slide 2"></button>
+                    <button type="button" data-bs-target="#carouselExampleIndicators" data-bs-slide-to="2"
+                            aria-label="Slide 3"></button>
+                </div>
+                <div class="carousel-inner">
+                    <div class="carousel-item active">
+                        <img src="../static/images/1.jpeg" th:src="@{images/1.jpeg}" class="d-block w-100" alt="..."/>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="../static/images/2.jpeg" th:src="@{images/2.jpeg}" class="d-block w-100" alt="..."/>
+                    </div>
+                    <div class="carousel-item">
+                        <img src="../static/images/3.jpeg" th:src="@{images/3.jpeg}" class="d-block w-100" alt="..."/>
+                    </div>
+                </div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#carouselExampleIndicators"
+                        data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Previous</span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#carouselExampleIndicators"
+                        data-bs-slide="next">
+                    <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                    <span class="visually-hidden">Next</span>
+                </button>
+            </div>
+        </div>
+        <div class="col-md-12" style="height: 20px"></div>
+        <div class="col-md-3 bg-light">
+            <nav class="nav flex-column">
+                <a class="nav-link active btn btn-outline-primary mb-1" aria-current="page" th:href="@{/}">행사상품</a>
+                <a class="nav-link btn btn-outline-primary mb-1" href="#">추천상품</a>
+                <a class="nav-link btn btn-outline-primary mb-1" href="#">인기상품</a>
+            </nav>
+        </div>
+        <div class="col-md-9">
+            <div class="row g-3">
+                <div class="col-md-12">
+                    <ul class="nav nav-tabs" id="myTab" role="tablist">
+                        <li class="nav-item" role="presentation">
+                            <a th:href="@{'/?category=kitten&type=CatFood'}" class="nav-link" id="home-tab"
+                               data-bs-toggle="tab" data-bs-target="#home"
+                               th:classappend="${type == 'CatFood'} ? 'active'" onclick="location.href = this.href"
+                               type="button" role="tab" aria-controls="home" aria-selected="true">사료
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a th:href="@{'/?category=소형&type=CatToilet'}" class="nav-link" id="profile-tab"
+                               data-bs-toggle="tab" data-bs-target="#profile"
+                               th:classappend="${type == 'CatToilet'} ? 'active'" onclick="location.href = this.href"
+                               type="button" role="tab" aria-controls="profile" aria-selected="false">화장실
+                            </a>
+                        </li>
+                        <li class="nav-item" role="presentation">
+                            <a th:href="@{'/?category=2단&type=CatTower'}" class="nav-link" id="contact-tab"
+                               data-bs-toggle="tab" data-bs-target="#contact"
+                               th:classappend="${type == 'CatTower'} ? 'active'" onclick="location.href = this.href"
+                               type="button" role="tab" aria-controls="contact" aria-selected="false">캣타워
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content" id="myTabContent">
+                        <div class="tab-pane fade" id="home" role="tabpanel" aria-labelledby="home-tab"
+                             th:classappend="${type == 'CatFood'} ? 'show active'">
+                            <nav class="nav nav-pills nav-fill">
+                                <a class="nav-link" aria-current="page"
+                                   th:classappend="${category == 'kitten'} ? 'active'"
+                                   th:href="@{'/?category=kitten&type=CatFood'}">유아묘</a>
+                                <a class="nav-link" th:classappend="${category == 'senior'} ? 'active'"
+                                   th:href="@{'/?category=senior&type=CatFood'}">중/장년묘</a>
+                                <a class="nav-link" th:classappend="${category == 'diet'} ? 'active'"
+                                   th:href="@{'/?category=diet&type=CatFood'}">다이어트</a>
+                            </nav>
+                        </div>
+                        <div class="tab-pane fade" id="profile" role="tabpanel" aria-labelledby="profile-tab"
+                             th:classappend="${type == 'CatToilet'} ? 'show active'">
+                            <nav class="nav nav-pills nav-fill">
+                                <a class="nav-link" aria-current="page" th:classappend="${category == '소형'} ? 'active'"
+                                   th:href="@{'/?category=소형&type=CatToilet'}">소형</a>
+                                <a class="nav-link" th:classappend="${category == '중형'} ? 'active'"
+                                   th:href="@{'/?category=중형&type=CatToilet'}">중형</a>
+                                <a class="nav-link" th:classappend="${category == '대형'} ? 'active'"
+                                   th:href="@{'/?category=대형&type=CatToilet'}">대형</a>
+                            </nav>
+                        </div>
+                        <div class="tab-pane fade" id="contact" role="tabpanel" aria-labelledby="contact-tab"
+                             th:classappend="${type == 'CatTower'} ? 'show active'">
+                            <nav class="nav nav-pills nav-fill">
+                                <a class="nav-link" aria-current="page" th:classappend="${category == '2단'} ? 'active'"
+                                   th:href="@{'/?category=2단&type=CatTower'}">2단</a>
+                                <a class="nav-link" th:classappend="${category == '3단'} ? 'active'"
+                                   th:href="@{'/?category=3단&type=CatTower'}">3단</a>
+                                <a class="nav-link" th:classappend="${category == '4단'} ? 'active'"
+                                   th:href="@{'/?category=4단&type=CatTower'}">4단</a>
+                            </nav>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12" th:if="${eventItems.isEmpty()}">
+                    <h2 class="text-center">앗!</h2>
+                    <h3 class="text-center">지금은 행사중인 상품이 없네요.</h3>
+                    <h3 class="text-center">곧 행사가 시작될지도 몰라요!</h3>
+                </div>
+                <div class="col-md-12" th:if="${!eventItems.isEmpty()}">
+                    <div id="itemDiv" class="row">
+                        <div class="col-md-4" th:each="eventItem : ${eventItems}">
+                            <div class="card">
+                                <img src="../static/images/img_dummy1.jpg"
+                                     th:src="@{'/upload/thumbnail/' + ${eventItem.thumbnailName}}"
+                                     class="card-img-top"
+                                     alt="...">
+                                <div class="card-body">
+                                    <h5 class="card-title" th:text="${eventItem.name}">Card title</h5>
+                                    <p class="card-text text-end">
+                                    <span class="fs-5 text-decoration-line-through"
+                                          th:text="${eventItem.price} + '₩'"></span><br>
+                                        <span class="fs-4 text-danger"
+                                              th:text="${'-' + eventItem.discount} + '%'"></span>
+                                        <span class="fs-4" th:text="${eventItem.eventPrice} + '₩'"></span>
+                                    </p>
+                                    <a href="#" th:href="@{'/item/main?item=' + ${eventItem.id}}"
+                                       class="stretched-link"></a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <script th:replace="fragment/common_parts :: infinityScrollPaging (18, 0, 'col-md-4', ${category}, ${type}, true)"></script>
+
+    </div>
+</div>
+
+</body>
+</html>

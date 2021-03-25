@@ -1,0 +1,27 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div th:block class="col-md-12" th:replace="fragment/common_nav :: nav">Navbar</div>
+        <div class="col-md-12" style="height: 50px;"></div>
+        <div class="jumbotron text-center col-md-8 bg-light mb-2">
+            <h2> 이메일 인증이 완료되었습니다. 캣츠몰을 선택해주셔서 대단히 감사합니다.</h2>
+        </div>
+        <div class="col-md-6 d-grid">
+            <a th:href="@{/members/signin}" class="btn btn-outline-primary">로그인 화면 돌아가기</a>
+        </div>
+    </div>
+</div>
+
+<script th:replace="fragment/common_parts :: form-validation"></script>
+
+</body>
+</html>

@@ -1,0 +1,46 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-12" th:replace="admin/fragment/admin_nav :: admin_nav('카테고리관리')"></div>
+        <div class="col-md-10 bg-light">
+            <div class="row g-2">
+                <div class="col-md-12 fs-3">카테고리 관리
+                    <hr class="m-0">
+                </div>
+                <div class="col-md-12">
+                    <form th:action="@{/admin/addcategory}" method="POST" class="row g-3" th:object="${adminCategoryDto}">
+                        <div class="col-md-6">
+                            <label for="parentName" class="form-label">카테고리</label>
+                            <select class="form-select" name="parent">
+                                <option id="parentName" th:each="category : ${categories}"
+                                        th:value="${category.getName()}" th:text="${category.getName()}">옵션
+                                </option>
+                            </select>
+                        </div>
+                        <div class="col-md-12"></div>
+                        <div class="col-md-6">
+                            <label for="childName" class="form-label">서브 카테고리</label>
+                            <input id="childName" type="text" class="form-control" name="child"/>
+                        </div>
+                        <div class="col-md-12">
+                            <button type="submit" class="btn btn-primary">추가</button>
+                        </div>
+                    </form>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

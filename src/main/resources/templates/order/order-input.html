@@ -1,0 +1,94 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div th:replace="fragment/common_nav :: nav"></div>
+
+<div class="container-md">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="row g-3">
+                <div class="col-12">
+                    <h2>상품 주문</h2>
+                </div>
+                <hr class="m-1">
+                <div class="col-12">
+                    <form th:action="@{'/order/' + ${item.id}}" method="post" th:object="${orderDto}" class="row justify-content-center needs-validation" novalidate>
+                        <label for="postcode" class="form-label">우편번호</label>
+                        <input id="postcode" type="text" class="form-control" th:field="*{postcode}"/>
+
+                        <label for="roadAddress" class="form-label">도로명주소</label>
+                        <input id="roadAddress" type="text" class="form-control" th:field="*{roadAddress}"/>
+
+                        <label for="jibunAddress" class="form-label">지번주소</label>
+                        <input id="jibunAddress" type="text" class="form-control" th:field="*{jibunAddress}"/>
+
+                        <label for="detailAddress" class="form-label">상세주소</label>
+                        <input id="detailAddress" type="text" class="form-control" th:field="*{detailAddress}"/>
+
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th scope="col" class="col-md-2">상품이미지</th>
+                                <th scope="col" class="col-md-6">상품명</th>
+                                <th scope="col" class="col-md-2">구매수량</th>
+                                <th scope="col">가격</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td></td>
+                                <td th:text="${item.name}">Mark</td>
+                                <td>
+                                    <input type="number" class="form-control" th:value="${orderDto.count}" th:field="*{count}" min="1" th:max="${item.quantity}"/>
+                                    <small th:if="${hasErrors}" class="form-text text-danger">올바른 구매수량을 입력해주세요.</small>
+                                </td>
+                                <td>
+                                    <span id="totalPrice" th:if="${!item.isEvent()}" th:text="${item.price * orderDto.count}"></span>
+                                    <span id="totalPrice" th:if="${item.isEvent()}" th:text="${item.eventPrice * orderDto.count}"></span>
+                                </td>
+                                <script>
+                                    let price;
+                                    if('[[${item.isEvent()}]]' == 'false') {
+                                        price = parseInt('[[${item.price}]]');
+                                    }else{
+                                        price = parseInt('[[${item.eventPrice}]]');
+                                    }
+                                    let countInput = document.getElementById('count');
+                                    let totalPrice = document.getElementById('totalPrice');
+                                    document.addEventListener('DOMContentLoaded', function(){
+                                        countInput.addEventListener('change', function(){
+                                            if(countInput.value <= 0 || parseInt(countInput.value) > countInput.max){
+                                                alert('구매수량은 최소 1개부터 최대 ' + countInput.max + '개 까지 가능합니다.');
+                                                countInput.value = 1;
+                                                return;
+                                            }
+                                            let temp = parseInt(countInput.value) * price;
+                                            totalPrice.innerHTML = temp.toString();
+                                        })
+                                    })
+                                </script>
+                            </tr>
+                            </tbody>
+                        </table>
+                        <div class="d-grid col-md-6">
+                            <button type="submit" class="btn btn-outline-success">주문</button>
+                        </div>
+                        <div class="d-grid col-md-6">
+                            <button type="button" class="btn btn-outline-danger" onclick="history.back()">취소</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

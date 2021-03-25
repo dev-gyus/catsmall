@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<th:block th:fragment="nav">
+    <div class="position-relative">
+        <div class="d-flex justify-content-center">
+            <div class="d-flex align-items-md-center" style="height: 150px">
+                <div class="mt-0" style="font-size: 30px;">Cats Mall</div>
+                <a href="" th:href="@{/}" class="stretched-link"></a>
+            </div>
+        </div>
+    </div>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/board" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            사료
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/board?category=kitten&type=CatFood">For Kitten</a></li>
+                            <li><a class="dropdown-item" href="/board?category=senior&type=CatFood">For Senior</a></li>
+                            <li><a class="dropdown-item" href="/board?category=diet&type=CatFood">Diet</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/board" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            화장실
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/board?category=소형&type=CatToilet">소형</a></li>
+                            <li><a class="dropdown-item" href="/board?category=중형&type=CatToilet">중형</a></li>
+                            <li><a class="dropdown-item" href="/board?category=대형&type=CatToilet">대형</a></li>
+                        </ul>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="/board" id="navbarDropdown" role="button"
+                           data-bs-toggle="dropdown" aria-expanded="false">
+                            캣타워
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="/board?category=2단&type=CatTower">2단</a></li>
+                            <li><a class="dropdown-item" href="/board?category=3단&type=CatTower">3단</a></li>
+                            <li><a class="dropdown-item" href="/board?category=4단&type=CatTower">4단</a></li>
+                        </ul>
+                    </li>
+                </ul>
+                <form th:action="@{/search}" class="d-flex" method="get">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="keyword">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
+                <div th:if="${#authorization.getAuthentication() != null and !#authorization.expr('isAuthenticated()')}">
+                    <button id="sign_up" class="btn btn-outline-success ms-1" type="button" onclick="location.href = '/members/signup'">Sign up</button>
+                </div>
+                <div th:if="${#authorization.getAuthentication() != null and !#authorization.expr('isAuthenticated()')}">
+                    <button id="sign_in" class="btn btn-outline-primary ms-1" type="button" onclick="location.href = '/members/signin'">Sign in</button>
+                </div>
+
+                <div class="position-relative mx-2" th:if="${#authorization.getAuthentication() != null and #authorization.expr('isAuthenticated()')}">
+                    <i class="fa fa-shopping-cart fa-2x" aria-hidden="true">
+                        <a class="stretched-link" th:href="@{/cart}"></a>
+                    </i>
+                </div>
+
+                <div class="position-relative mx-2" th:if="${#authorization.getAuthentication() != null and #authorization.expr('isAuthenticated()')}">
+                    <i class="fa fa-bell-o fa-2x" aria-hidden="true">
+                        <a class="stretched-link" th:href="@{/alert}"></a>
+                    </i>
+                </div>
+
+                <div class="position-relative mx-2" th:if="${#authorization.getAuthentication() != null and #authorization.expr('isAuthenticated()')}">
+                    <i class="fa fa-user-circle-o fa-2x" aria-hidden="true">
+                        <a class="stretched-link" th:href="@{/members/mypage}"></a>
+                    </i>
+                </div>
+                <div th:if="${#authorization.getAuthentication() != null and #authorization.expr('isAuthenticated()') && #request.isUserInRole('ROLE_ADMIN')}">
+                    <button class="btn btn-outline-primary ms-1" type="button" onclick="location.href = '/admin'">관리자페이지</button>
+                </div>
+                <div th:if="${#authorization.getAuthentication() != null and #authorization.expr('isAuthenticated()')}">
+                    <form class="d-flex" method="post" th:action="@{/logout}">
+                        <button class="btn btn-outline-danger" type="submit">Log out</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <script>
+        var $dropdown = $(".navbar-nav .dropdown");
+        var $dropdownToggle = $(".dropdown-toggle");
+        var $dropdownMenu = $(".dropdown-menu");
+        var showClass = "show";
+
+        $(window).on("load resize", function() {
+            if (this.matchMedia("(min-width: 768px)").matches) {
+                $dropdown.hover(
+                    function() {
+                        var $this = $(this);
+                        $this.addClass(showClass);
+                        $this.find($dropdownToggle).attr("aria-expanded", "true");
+                        $this.find($dropdownMenu).addClass(showClass);
+                    },
+                    function() {
+                        var $this = $(this);
+                        $this.removeClass(showClass);
+                        $this.find($dropdownToggle).attr("aria-expanded", "false");
+                        $this.find($dropdownMenu).removeClass(showClass);
+                    }
+                );
+            } else {
+                $dropdown.off("mouseenter mouseleave");
+            }
+        });
+    </script>
+
+</th:block>
+</html>

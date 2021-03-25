@@ -1,0 +1,63 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="_csrf" th:content="${_csrf.token}">
+    <meta name="_carf_header" th:content="${_csrf.headerName}">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row">
+        <div class="col-md-12">
+            <th:block th:replace="fragment/common_nav :: nav"></th:block>
+        </div>
+        <div class="col-md-12 mt-2">
+            <div class="row justify-content-center g-3">
+                <div class="col-md-12 text-center">
+                    <h2 th:text="${keyword} + ' 키워드 검색결과'"></h2>
+                    <hr>
+                </div>
+                <div class="col-md-12">
+                    <h2>상품 검색</h2>
+                    <hr>
+                </div>
+                <div class="col-md-12" th:if="${searchItems.isEmpty()}">
+                    <h2>검색된 상품이 없습니다</h2>
+                </div>
+                <div class="col-md-4" th:each="searchItem : ${searchItems}" th:if="${!searchItems.isEmpty()}">
+                    <div class="card">
+                        <img src="..." th:src="@{'/upload/thumbnail/' + ${searchItem.getThumbnailName()}}" class="card-img-top" alt="...">
+                        <div class="card-body">
+                            <h5 th:text="${searchItem.itemName}" class="card-title">Item name</h5>
+                            <p class="card-text" th:text="${searchItem.getContent()}"></p>
+                            <div class="card-text text-end" th:if="${!searchItem.isEvent()}">
+                                <span class="card-text text-end fs-4" th:text="${searchItem.getPrice() + '₩'}"></span>
+                            </div>
+                            <div class="card-text text-end" th:if="${searchItem.isEvent()}">
+                                <span class="text-decoration-line-through fs-4" th:text="${searchItem.getPrice() + '₩'}"></span><br>
+                                <span class="text-danger fs-4" th:text="${'-'+ searchItem.getDiscount() + '%'}"></span>
+                                <span class="fs-4" th:text="${searchItem.getEventPrice() + '₩'}"></span>
+                            </div>
+                            <a href="/item"
+                               th:href="@{'item/main?item=' + ${searchItem.itemId}}"
+                               class="stretched-link"></a>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-12">
+                    <div class="text-end"><a th:href="@{'/search/item?keyword=' + ${keyword}}">더 많은 상품 보기</a></div>
+                    <hr>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script th:replace="fragment/common_parts :: itemContentLimit"></script>
+
+</body>
+</html>

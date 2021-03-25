@@ -1,0 +1,23 @@
+<!doctype html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <div th:replace="fragment/common_parts.html :: head"></div>
+    <title>CatsMall</title>
+</head>
+<body>
+<div class="container-md">
+    <div class="row g-3 justify-content-center">
+        <div class="col-md-12" th:replace="admin/fragment/admin_nav :: admin_nav('대시보드')"></div>
+        <div class="col-md-10 bg-light">
+            <div class="row g-3">
+                <div class="col-md-12 fs-3">대시보드<hr class="m-0"> </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>
