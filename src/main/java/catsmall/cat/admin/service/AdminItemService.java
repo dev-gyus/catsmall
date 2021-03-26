@@ -41,12 +41,13 @@ public class AdminItemService {
     private final AlertUtils alertUtils;
     private final AppProperties appProperties;
 
-    public ItemCategoryDto findAllCategoryAndType(){
+    public ItemCategoryDto findAllCategoryAndType() {
         List<ItemCategory> result = adminItemRepository.findAllCategoryAndTypes();
         ItemCategoryDto itemCategoryDto = ItemCategoryDto.bindingItemCategory(result);
         return itemCategoryDto;
     }
-    public ItemCategoryDto findTypesByCategoryName(String category){
+
+    public ItemCategoryDto findTypesByCategoryName(String category) {
         List<ItemCategory> result = adminItemRepository.findTypesByCategoryName(category);
         ItemCategoryDto itemCategoryDto = ItemCategoryDto.bindingItemCategory(result);
         return itemCategoryDto;
@@ -70,21 +71,25 @@ public class AdminItemService {
         } catch (IOException e) {
             result.rejectValue("thumbnail", null, "이미지 파일만 업로드 가능합니다.");
         }
+        String itemName = itemDto.getName();
+        for(int a=0; a < 100; a++) {
             Item item = itemDto.transformItem(itemDto);
+            item.setName(itemName + a);
             adminItemRepository.save(item);
             Category category = adminCategoryRepository.findByName(itemDto.getCategory());
             ItemCategory itemCategory = new ItemCategory(category, item);
             adminItemCategoryRepository.save(itemCategory);
+        }
     }
 
     // TODO 파일 저장 경로 yml파일로 관리하도록 변경할것
     private String saveThumbnail(MultipartFile thumbnail) throws IOException {
         int index = thumbnail.getContentType().indexOf('/');
-        if(!thumbnail.getContentType().substring(0, index).equals("image")){
+        if (!thumbnail.getContentType().substring(0, index).equals("image")) {
             throw new IOException();
         }
-        File thumbDirectory = new File(appProperties.getImgPrefix()+"thumbnail/");
-        if(!thumbDirectory.exists()){
+        File thumbDirectory = new File(appProperties.getImgPrefix() + "thumbnail/");
+        if (!thumbDirectory.exists()) {
             thumbDirectory.mkdirs();
         }
         String extension = FilenameUtils.getExtension(thumbnail.getOriginalFilename()); // . 제외한 확장자만 나옴 ex) .jpg = jpg반환
@@ -95,29 +100,36 @@ public class AdminItemService {
     }
 
     @Transactional
-    public void modifyType(ItemTypeDto itemTypeDto){
+    public void modifyType(ItemTypeDto itemTypeDto) {
         List<ItemCategory> itemCategory = adminItemRepository.findTypesByCategoryName(itemTypeDto.getCategoryName());
         itemCategory.forEach(ic -> {
-            ic.getItem().changeItemType(itemTypeDto.getOriginType() ,itemTypeDto.getType());
+            ic.getItem().changeItemType(itemTypeDto.getOriginType(), itemTypeDto.getType());
         });
     }
+
     @Transactional
-    public void deleteType(ItemTypeDto itemTypeDto){
+    public void deleteType(ItemTypeDto itemTypeDto) {
         List<ItemCategory> itemCategories = adminItemRepository.findTypesByCategoryName(itemTypeDto.getCategoryName());
         List<Item> items = adminItemRepository.findAll();
 
         // Item Table 업데이트 메소드 ( 입력받은 카테고리에 해당하는 엔티티에 대한 타입중 입력된 타입을 제거하는 기능 )
         items.removeIf(it -> {
             String category = itemTypeDto.getCategoryName();
-            if(it instanceof CatFood && category.equals("CatFood")){
+            if (it instanceof CatFood && category.equals("CatFood")) {
                 CatFood catFood = (CatFood) it;
-                if(catFood.getType().equals(itemTypeDto.getType())){adminItemRepository.delete(catFood);}
-            }else if(it instanceof CatToilet && category.equals("CatToilet")){
+                if (catFood.getType().equals(itemTypeDto.getType())) {
+                    adminItemRepository.delete(catFood);
+                }
+            } else if (it instanceof CatToilet && category.equals("CatToilet")) {
                 CatToilet catToilet = (CatToilet) it;
-                if(catToilet.getType().equals(itemTypeDto.getType())){adminItemRepository.delete(catToilet);}
-            }else if(it instanceof CatTower && category.equals("CatTower")){
+                if (catToilet.getType().equals(itemTypeDto.getType())) {
+                    adminItemRepository.delete(catToilet);
+                }
+            } else if (it instanceof CatTower && category.equals("CatTower")) {
                 CatTower catTower = (CatTower) it;
-                if(catTower.getType().equals(itemTypeDto.getType())){adminItemRepository.delete(catTower);}
+                if (catTower.getType().equals(itemTypeDto.getType())) {
+                    adminItemRepository.delete(catTower);
+                }
             }
             return false;
         });
@@ -126,7 +138,9 @@ public class AdminItemService {
         itemCategories.forEach(ic -> {
 //             Category와 연관된 아이템카테고리들중 해당 아이템카테고리를 삭제
             ic.getCategory().getItemCategory().removeIf(cic -> {
-                if(cic == ic){return true;}
+                if (cic == ic) {
+                    return true;
+                }
                 return false;
             });
         });
@@ -138,10 +152,10 @@ public class AdminItemService {
         modifyItemDto.setId(findItem.getId());
 
         // 이미지 파일 업로드 안했을경우 (기존 상품객체에 있던 썸네일 정보 다시 사용)
-        if(modifyItemDto.getFile().getSize() == 0){
+        if (modifyItemDto.getFile().getSize() == 0) {
             modifyItemDto.setThumbnailName(findItem.getThumbnailName());
             modifyItemDto.setThumbnailOriginal(findItem.getThumbnailOriginal());
-        }else{
+        } else {
             try {
                 modifyItemDto.setThumbnailName(saveThumbnail(modifyItemDto.getFile()));
                 modifyItemDto.setThumbnailOriginal(modifyItemDto.getFile().getOriginalFilename());
@@ -150,13 +164,13 @@ public class AdminItemService {
             }
         }
         // 할인행사 할 경우
-        if(modifyItemDto.isEvent()){
+        if (modifyItemDto.isEvent()) {
             int price = findItem.getPrice();
-            int eventPrice = (int)Math.round(price * (1 - modifyItemDto.getDiscount()/100.0));
+            int eventPrice = (int) Math.round(price * (1 - modifyItemDto.getDiscount() / 100.0));
             findItem.setEventPrice(eventPrice);
         }
         modelMapper.map(modifyItemDto, findItem);
-        if(findItem.getItemStatus() == ItemStatus.SOLDOUT && findItem.getQuantity() > 0){
+        if (findItem.getItemStatus() == ItemStatus.SOLDOUT && findItem.getQuantity() > 0) {
             findItem.setItemStatus(ItemStatus.NOWSALE);
             alertUtils.makeInStockAlert(findItem);
         }
@@ -171,11 +185,11 @@ public class AdminItemService {
     public void changeStatus(Long itemId, RedirectAttributes redirectAttributes) {
         Item findItem = adminItemRepository.findById(itemId).orElseThrow();
         ItemStatus status = findItem.getItemStatus();
-        if(status == ItemStatus.READY && findItem.getQuantity() > 0){
+        if (status == ItemStatus.READY && findItem.getQuantity() > 0) {
             findItem.setItemStatus(ItemStatus.NOWSALE);
-        }else if(status == ItemStatus.NOWSALE || status == ItemStatus.SOLDOUT){
+        } else if (status == ItemStatus.NOWSALE || status == ItemStatus.SOLDOUT) {
             findItem.setItemStatus(ItemStatus.READY);
-        }else{
+        } else {
             redirectAttributes.addFlashAttribute("statusError", "재고수량을 확인해주세요");
         }
     }
