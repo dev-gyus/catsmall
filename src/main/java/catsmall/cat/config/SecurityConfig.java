@@ -55,7 +55,7 @@ public class SecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity http) throws Exception {
         http
                 .authorizeRequests()
-                .mvcMatchers("/", "/api/**","/board", "/item/**", "/search/**", "/profile",
+                .mvcMatchers("/", "/api/**","/board", "/item/**", "/search/**", "/profile", "/application/health",
                         "/members/signin", "/members/signup", "/members/logout", "/members/forgot/**").permitAll()
                 .mvcMatchers("/admin/**","/admin").hasRole("ADMIN")
                 .anyRequest().authenticated();
