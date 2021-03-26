@@ -11,4 +11,5 @@ public class AppProperties {
     private String host;
     private String resourceRoot;
     private String imgPrefix;
+    private String nowProfile;
 }
