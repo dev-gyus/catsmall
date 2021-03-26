@@ -21,14 +21,14 @@ public class SearchController {
     @GetMapping({"/",""})
     public String search(@RequestParam String keyword, @PageableDefault(size = 6, page = 0) Pageable pageable, Model model){
         // TODO 검색결과에 넣을거 추가하면 따로 쿼리메소드 만들것 (현재는 상품만 검색해옴)
-        Page<SearchDto> searchItems = searchRepository.findAllItemPagingByKeyword(keyword, pageable);
+        Page<SearchDto> searchItems = searchRepository.findAllItemPagingByKeyword(pageable, keyword);
         model.addAttribute("searchItems", searchItems);
         model.addAttribute("keyword", keyword);
         return "search/main";
     }
     @GetMapping("/item")
     public String search_item(@RequestParam String keyword, @PageableDefault(size = 20, page = 0) Pageable pageable, Model model){
-        Page<SearchDto> searchItems = searchRepository.findAllItemPagingByKeyword(keyword, pageable);
+        Page<SearchDto> searchItems = searchRepository.findAllItemPagingByKeyword(pageable, keyword);
         model.addAttribute("keyword", keyword);
         model.addAttribute("searchItems", searchItems);
         return "search/item";

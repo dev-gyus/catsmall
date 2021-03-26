@@ -4,6 +4,8 @@ import catsmall.cat.entity.ItemCategory;
 import catsmall.cat.entity.dto.item.ItemListDto;
 import catsmall.cat.repository.ItemCategoryRepository;
 import catsmall.cat.repository.ItemRepository;
+import catsmall.cat.search.SearchDto;
+import catsmall.cat.search.SearchRepository;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -19,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class ApiController {
     private final ItemCategoryRepository itemCategoryRepository;
     private final ItemRepository itemRepository;
+    private final SearchRepository searchRepository;
 
     @GetMapping("/api/find-eventItem-list")
     @ResponseBody
@@ -40,9 +43,18 @@ public class ApiController {
         itemDtoListWrapper.setItemlistDtoList(result);
         return itemDtoListWrapper;
     }
+    @GetMapping("/api/find-search-item-list")
+    @ResponseBody
+    public ItemDtoListWrapper find_search_itemList(Pageable pageable, @RequestParam String keyword){
+        Page<SearchDto> result = searchRepository.findAllItemPagingByKeyword(pageable, keyword);
+        ItemDtoListWrapper itemDtoListWrapper = new ItemDtoListWrapper();
+        itemDtoListWrapper.setSearchDtoList(result);
+        return itemDtoListWrapper;
+    }
 
     @Data
     static class ItemDtoListWrapper{
         private Page<ItemListDto> itemlistDtoList;
+        private Page<SearchDto> searchDtoList;
     }
 }

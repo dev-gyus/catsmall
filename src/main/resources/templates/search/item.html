@@ -19,7 +19,7 @@
             <div id="itemDiv" class="row justify-content-center g-3">
                 <div class="col-md-12 text-center">
                     <h2 th:text="${keyword} + ' 키워드로 더 많은 상품을 검색한 결과입니다.'"></h2>
-                    <button type="button" class="btn btn-outline-primary" onclick="history.go(-1)" >뒤로 가기</button>
+                    <button type="button" class="btn btn-outline-primary" onclick="history.go(-1)">뒤로 가기</button>
                     <hr>
                 </div>
                 <div class="col-md-12">
@@ -31,7 +31,8 @@
                 </div>
                 <div class="col-md-6" th:each="searchItem : ${searchItems}" th:if="${!searchItems.isEmpty()}">
                     <div class="card">
-                        <img src="..." th:src="@{'/upload/thumbnail/' + ${searchItem.getThumbnailName()}}" class="card-img-top" alt="...">
+                        <img src="..." th:src="@{'/upload/thumbnail/' + ${searchItem.getThumbnailName()}}"
+                             class="card-img-top" alt="...">
                         <div class="card-body">
                             <h5 th:text="${searchItem.itemName}" class="card-title">Item name</h5>
                             <p class="card-text" th:text="${searchItem.getContent()}"></p>
@@ -39,7 +40,8 @@
                                 <span class="card-text text-end fs-4" th:text="${searchItem.getPrice() + '₩'}"></span>
                             </div>
                             <div class="card-text text-end" th:if="${searchItem.isEvent()}">
-                                <span class="text-decoration-line-through fs-4" th:text="${searchItem.getPrice() + '₩'}"></span><br>
+                                <span class="text-decoration-line-through fs-4"
+                                      th:text="${searchItem.getPrice() + '₩'}"></span><br>
                                 <span class="text-danger fs-4" th:text="${'-'+ searchItem.getDiscount() + '%'}"></span>
                                 <span class="fs-4" th:text="${searchItem.getEventPrice() + '₩'}"></span>
                             </div>
@@ -56,7 +58,100 @@
 
 <script th:replace="fragment/common_parts :: itemContentLimit"></script>
 
-<script th:replace="fragment/common_parts :: infinityScrollPaging (20, 0, 'col-md-6')"></script>
+<script>
+    let isLastPage = false;
+    let itemDiv = document.getElementById('itemDiv');
+    let size = 20;
+    let page = 0;
+    let fetchReady = true;
+    let colSize = 'col-md-6';
+    let keyword = '[[${keyword}]]';
+
+    // 페이징
+    $(function () {
+        $(window).scroll(function () {
+            let $window = $(this);
+            let scrollTop = $window.scrollTop();
+            let windowHeight = $window.height();
+            let documentHeight = $(document).height();
+
+            // scrollbar의 thumb가 바닥 전 30px까지 도달 하면 리스트를 가져온다.
+            if ((scrollTop + windowHeight + 30) > documentHeight && !isLastPage && fetchReady) {
+                addEventItem(size, ++page, colSize, keyword);
+                fetchReady = false;
+            }
+        })
+    });
+
+    function addEventItem(size, page, colSize, keyword) {
+        $.ajax({
+            url: '/api/find-search-item-list?size=' + size + '&page=' + page + '&keyword=' + keyword,
+            type: 'get',
+            dataType: 'json',
+            success: function (result) {
+                let page = result.searchDtoList;
+                let homeDtoList = page.content;
+                isLastPage = page.last;
+                for (let homeDto of homeDtoList) {
+                    let parentDiv = document.createElement('div');
+                    parentDiv.setAttribute('class', colSize);
+                    let cardDiv = document.createElement('div');
+                    cardDiv.setAttribute("class", "card");
+
+                    let img = document.createElement('img');
+                    img.src = '/upload/thumbnail/' + homeDto.thumbnailName;
+                    img.setAttribute('class', 'card-img-top');
+                    cardDiv.appendChild(img);
+
+                    let cardBody = document.createElement('div');
+                    cardBody.setAttribute('class', 'card-body');
+
+                    let cardTitle = document.createElement('h5');
+                    cardTitle.setAttribute('class', 'card-title');
+                    cardTitle.innerHTML = homeDto.itemName;
+                    cardBody.appendChild(cardTitle);
+
+                    let p = document.createElement('p');
+                    p.setAttribute('class', 'card-text text-end');
+
+                    if (homeDto.event) {
+                        let originPrice = document.createElement('span');
+                        originPrice.setAttribute('class', 'fs-5 text-decoration-line-through');
+                        originPrice.innerHTML = homeDto.price + '₩' + '<br>';
+                        p.appendChild(originPrice);
+
+                        let discount = document.createElement('span');
+                        discount.setAttribute('class', 'fs-4 text-danger');
+                        discount.innerHTML = '-' + homeDto.discount + '% ';
+                        p.appendChild(discount);
+
+                        let eventPrice = document.createElement('span');
+                        eventPrice.setAttribute('class', 'fs-4');
+                        eventPrice.innerHTML = homeDto.eventPrice + '₩';
+                        p.appendChild(eventPrice);
+                    } else {
+                        let originPrice = document.createElement('span');
+                        originPrice.setAttribute('class', 'fs-4');
+                        originPrice.innerHTML = homeDto.price + '₩' + '<br>';
+                        p.appendChild(originPrice);
+                    }
+                    cardBody.appendChild(p);
+
+                    let itemLink = document.createElement('a');
+                    itemLink.setAttribute('class', 'stretched-link');
+                    itemLink.href = '/item/main?item=' + homeDto.itemId;
+                    cardBody.appendChild(itemLink);
+
+                    cardDiv.appendChild(cardBody);
+                    parentDiv.appendChild(cardDiv);
+                    itemDiv.appendChild(parentDiv);
+                    fetchReady = true;
+                }
+
+            }
+        });
+    }
+</script>
 
 </body>
 </html>

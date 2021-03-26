@@ -30,7 +30,7 @@ public class SearchRepository {
         this.modelMapper = modelMapper;
     }
 
-    public Page<SearchDto> findAllItemPagingByKeyword(String keyword, Pageable pageable) {
+    public Page<SearchDto> findAllItemPagingByKeyword(Pageable pageable, String keyword) {
         QueryResults<Item> result = queryFactory
                 .selectFrom(item)
                 .where(item.name.contains(keyword).or(item.content.contains(keyword)))
