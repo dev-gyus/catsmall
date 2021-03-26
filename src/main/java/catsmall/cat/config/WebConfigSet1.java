@@ -8,10 +8,10 @@ import org.springframework.web.multipart.commons.CommonsMultipartResolver;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
-@Profile("real")
+@Profile("set1")
 @Configuration
 @RequiredArgsConstructor
-public class WebConfigReal implements WebMvcConfigurer {
+public class WebConfigSet1 implements WebMvcConfigurer {
     private final AppProperties appProperties;
 
     @Override
